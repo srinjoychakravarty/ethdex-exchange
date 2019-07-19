@@ -97,6 +97,12 @@ contract('Token', ([deployer, sender, receiver]) => {
 
 		describe('failed transfer', () => {
 
+			it('prevents sender from sending more tokens than they own', async () => {
+				let invalidAmount
+				invalidAmount = tokens(166666667) // 1 greater than totalSupply
+				await token.transfer(receiver, invalidAmount, {from: deployer}).should.be.rejectedWith('VM Exception while processing transaction: revert')
+			})
+
 		})
 	})
 })

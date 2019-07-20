@@ -1,4 +1,4 @@
-import {tokens, EVM_REVERT, INVALID_ADDRESS} from './helpers.js'
+import {tokens, EVM_REVERT, INVALID_ADDRESS, INVALID_EXCHANGE} from './helpers.js'
 
 const Token = artifacts.require('./Token') 
 
@@ -146,8 +146,8 @@ contract('Token', ([deployer, receiver, exchange]) => {
 		})
 
 		describe('failed transfer', () => {
-			it('', async() => {
-
+			it('rejects approvals to invalid exchange addresses', async() => {
+				await token.approve(0x0, approvedAmount, {from: deployer}).should.be.rejectedWith(INVALID_EXCHANGE)
 			})
 		})
 	})

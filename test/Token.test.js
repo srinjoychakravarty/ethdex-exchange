@@ -151,4 +151,127 @@ contract('Token', ([deployer, receiver, exchange]) => {
 			})
 		})
 	})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	describe('sending tokens from', () => {
+		
+		let amount
+		let result
+
+		beforeEach(async() => {
+			amount = tokens(45)
+			await token.approve(exchange, amount, {from: deployer})
+		})
+
+
+		describe('successful transfer from', () => {
+			
+			beforeEach(async() => {
+				result = await token.transferFrom(deployer, receiver, amount, {from: exchange}) 
+			})
+
+			it('exchange transfers from user token balances correctly', async() => {
+				let balanceOf_deployer
+				let balanceOf_receiver
+				
+
+				// After transferFrom
+				balanceOf_deployer = await token.balanceOf(deployer)
+				balanceOf_deployer.toString().should.equal(tokens(166666621).toString())	
+				balanceOf_receiver = await token.balanceOf(receiver)
+				balanceOf_receiver.toString().should.equal(tokens(45).toString())
+
+			})
+
+			// it('emits a transfer event', async() => {
+				
+			// 	//console.log(result.logs)
+			// 	const log_object = result.logs[0]
+			// 	log_object.event.should.equal("Transfer")
+
+			// 	const args = log_object.args
+			// 	args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
+			// 	args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
+			// 	args.value.toString().should.equal(amount.toString(), "value does not match amount")
+			// })
+
+			})
+
+		describe('failed transfer', () => {
+
+			// it('prevents sender from sending more tokens than they own', async() => {
+			// 	let excessiveAmount
+
+			// 	excessiveAmount = tokens(166666667) // 1 greater than totalSupply
+			// 	await token.transfer(receiver, excessiveAmount, {from: deployer}).should.be.rejectedWith(EVM_REVERT)
+
+			// 	// receiver tries to send 1 token even though they have 0 to begin with
+			// 	await token.transfer(deployer, amount, {from: receiver}).should.be.rejectedWith(EVM_REVERT)
+			// })
+
+			// it('rejects transfers to invalid addresses including the 0 address', async() => {
+			// 	await token.transfer(0x0, amount, {from: deployer}).should.be.rejectedWith(INVALID_ADDRESS)
+			// })
+
+		})
+	})
 })

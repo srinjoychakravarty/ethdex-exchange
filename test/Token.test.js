@@ -49,6 +49,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 	})
 
 	describe('sending tokens', () => {
+		
 		let amount
 		let result
 
@@ -82,14 +83,14 @@ contract('Token', ([deployer, receiver, exchange]) => {
 			})
 
 			it('emits a transfer event', async() => {
+				
 				//console.log(result.logs)
-
 				const log_object = result.logs[0]
 				log_object.event.should.equal("Transfer")
 
 				const args = log_object.args
-				args.from.toString().should.equal(deployer, "from address doesn't match deployer")
-				args.to.toString().should.equal(receiver, "to address doesn't match receiver")
+				args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
+				args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
 				args.value.toString().should.equal(amount.toString(), "value does not match amount")
 			})
 
@@ -115,6 +116,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 	})
 
 	describe('approving tokens', () => {
+		
 		let approvedAmount
 		let approvedResult
 
@@ -124,9 +126,22 @@ contract('Token', ([deployer, receiver, exchange]) => {
 		})
 
 		describe('successful transfer', () => {
+			
 			it('allocates an allowance for delegated token spending on exchange', async() => {
 				const allowance = await token.allowance(deployer, exchange)
 				allowance.toString().should.equal(approvedAmount.toString())
+			})
+
+			it('emits an approval event', async() => {
+				
+				//console.log(approvedResult.logs)
+				const log_object = approvedResult.logs[0]
+				log_object.event.should.equal("Approval")
+
+				const args = log_object.args
+				args.owner.toString().should.equal(deployer, "owner address doesn't match deployer address")
+				args.spender.toString().should.equal(exchange, "spender address doesn't match exchange address")
+				args.value.toString().should.equal(approvedAmount.toString(), "value does not match approvedAmount")
 			})
 		})
 

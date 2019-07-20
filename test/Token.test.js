@@ -242,19 +242,19 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 			})
 
-			// it('emits a transfer event', async() => {
+			it('emits a transfer event', async() => {
 				
-			// 	//console.log(result.logs)
-			// 	const log_object = result.logs[0]
-			// 	log_object.event.should.equal("Transfer")
+				//console.log(result.logs)
+				const log_object = result.logs[0]
+				log_object.event.should.equal("Transfer")
 
-			// 	const args = log_object.args
-			// 	args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
-			// 	args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
-			// 	args.value.toString().should.equal(amount.toString(), "value does not match amount")
-			// })
-
+				const args = log_object.args
+				args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
+				args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
+				args.value.toString().should.equal(amount.toString(), "value does not match amount")
 			})
+
+		})
 
 		describe('failed transfer', () => {
 

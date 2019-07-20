@@ -4,7 +4,7 @@ const Token = artifacts.require('./Token')
 
 require('chai').use(require('chai-as-promised')).should()
 
-contract('Token', ([deployer, sender, receiver]) => {
+contract('Token', ([deployer, receiver, exchange]) => {
 
 	const name = "Dexcoin"
 	const symbol = "DEX"
@@ -111,6 +111,29 @@ contract('Token', ([deployer, sender, receiver]) => {
 				await token.transfer(0x0, amount, {from: deployer}).should.be.rejectedWith(INVALID_ADDRESS)
 			})
 
+		})
+	})
+
+	describe('approving tokens', () => {
+		let approvedAmount
+		let approvedResult
+
+		beforeEach(async() => {
+			approvedAmount = tokens(7)
+			approvedResult = await token.approve(exchange, approvedAmount, {from: deployer}) 
+		})
+
+		describe('successful transfer', () => {
+			it('allocates an allowance for delegated token spending on exchange', async() => {
+				const allowance = await token.allowance(deployer, exchange)
+				allowance.toString().should.equal(approvedAmount.toString())
+			})
+		})
+
+		describe('failed transfer', () => {
+			it('', async() => {
+
+			})
 		})
 	})
 })

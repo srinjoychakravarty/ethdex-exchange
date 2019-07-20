@@ -17,6 +17,10 @@ contract Token {
 	// Track balances
 	mapping(address => uint256) public balanceOf;
 
+	// Tracks max tokens allowed be spent by exchange on behalf of token owner
+	// first address corresponds to user address, second address corresponds to exchange address
+	mapping(address => mapping(address => uint256)) public allowance;
+
 	// Send tokens
 
 	constructor() public {
@@ -31,5 +35,11 @@ contract Token {
 		balanceOf[_to] = balanceOf[_to].add(_value);
 		emit Transfer(msg.sender, _to, _value);
 		return true; 
+	}
+
+	// Approve tokens
+	function approve(address _spender, uint256 _value) public returns (bool success) {
+		allowance[msg.sender][_spender] = _value;
+		return true;
 	}
 }

@@ -214,19 +214,19 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 	describe('sending tokens from', () => {
 		
-		let amount
+		let user_approved_amount
 		let result
 
 		beforeEach(async() => {
-			amount = tokens(45)
-			await token.approve(exchange, amount, {from: deployer})
+			user_approved_amount = tokens(45)
+			await token.approve(exchange, user_approved_amount, {from: deployer})
 		})
 
 
 		describe('successful transfer from', () => {
 			
 			beforeEach(async() => {
-				result = await token.transferFrom(deployer, receiver, amount, {from: exchange}) 
+				result = await token.transferFrom(deployer, receiver, user_approved_amount, {from: exchange}) 
 			})
 
 			it('exchange transfers from user token balances correctly', async() => {
@@ -242,7 +242,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 			})
 
-			it('resets allowance to 0 after allowance amount is used up with successful transferFrom', async() => {
+			it('resets allowance to 0 after allowance user_approved_amount is used up with successful transferFrom', async() => {
 				const allowance = await token.allowance(deployer, exchange)
 				allowance.toString().should.equal('0')
 			})
@@ -256,26 +256,19 @@ contract('Token', ([deployer, receiver, exchange]) => {
 				const args = log_object.args
 				args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
 				args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
-				args.value.toString().should.equal(amount.toString(), "value does not match amount")
+				args.value.toString().should.equal(user_approved_amount.toString(), "value does not match user_approved_amount")
 			})
 
 		})
 
 		describe('failed transfer', () => {
 
-			// it('prevents sender from sending more tokens than they own', async() => {
-			// 	let excessiveAmount
+			it('rejects attempts to transfer more than the user_approved_amount delegated by user to the exchange', async() => {
+				//Feeble attempt to transfer way too many tokens
+				const cheekyAmount = tokens(46)
+				await token.transferFrom(deployer, receiver, cheekyAmount, {from: exchange}).should.be.rejectedWith(EVM_REVERT)
+			})
 
-			// 	excessiveAmount = tokens(166666667) // 1 greater than totalSupply
-			// 	await token.transfer(receiver, excessiveAmount, {from: deployer}).should.be.rejectedWith(EVM_REVERT)
-
-			// 	// receiver tries to send 1 token even though they have 0 to begin with
-			// 	await token.transfer(deployer, amount, {from: receiver}).should.be.rejectedWith(EVM_REVERT)
-			// })
-
-			// it('rejects transfers to invalid addresses including the 0 address', async() => {
-			// 	await token.transfer(0x0, amount, {from: deployer}).should.be.rejectedWith(INVALID_ADDRESS)
-			// })
 
 		})
 	})

@@ -38,13 +38,13 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 		let exchangeDeposit
 		let testAmount
 
+		describe('successful deposit', () => {
+		
 		beforeEach(async() => {
 			testAmount = tokens(7)
 			await token.approve(exchange.address, testAmount, {from: kinKendall})
 			exchangeDeposit = await exchange.depositToken(token.address, testAmount, {from: kinKendall})
 		})
-
-		describe('successful deposit', () => {
 
 			it('tracks the token deposit', async() => {
 				// Checks token balance on exchange
@@ -76,9 +76,17 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 
 		describe('failed deposit', () => {
 
-			it('xxxx', async() => {
+			it('when exchange has insufficient tokens approved for transferring', async() => {
+
+				// Exchange not approved for any tokens in this code path
+				await exchange.depositToken(token.address, testAmount, {from: kinKendall}).should.be.rejectedWith(EVM_REVERT)
+			})
+
+			it('rejects native ether deposits', async() => {
 
 			})
+
+
 		})
 	})
 })

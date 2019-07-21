@@ -264,10 +264,16 @@ contract('Token', ([deployer, receiver, exchange]) => {
 		describe('failed delegated transfer', () => {
 
 			const cheekyAmount = tokens(46)
+			const audaciousAmount = tokens(166666668)
 			
-			it('rejects attempts to transfer more than the user_approved_amount delegated by user to the exchange', async() => {
-				//Feeble attempt to transfer way too many tokens
+			it('rejects attempts to transfer more tokens than those delegated by user', async() => {
+				//Feeble attempt to transfer more tokens than approved
 				await token.transferFrom(deployer, receiver, cheekyAmount, {from: exchange}).should.be.rejectedWith(EVM_REVERT)
+			})
+
+			it('rejects attempts to transfer more tokens than the user even owns', async() => {
+				//Audacious attempt to transfer way too many tokens
+				await token.transferFrom(deployer, receiver, audaciousAmount, {from: exchange}).should.be.rejectedWith(EVM_REVERT)
 			})
 
 			it('rejects attempts to transfer to non-existant addresses', async() => {

@@ -48,9 +48,17 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 
 			it('tracks the token deposit', async() => {
 				// Checks token balance on exchange
-				let tokenBalance
-				tokenBalance = await token.balanceOf(exchange.address)
-				tokenBalance.toString().should.equal(testAmount.toString())
+				let exchangeBalance
+				let userBalance
+				
+				// verifies token contract has record of exchange owning deposited tokens
+				exchangeBalance = await token.balanceOf(exchange.address)
+				exchangeBalance.toString().should.equal(testAmount.toString())
+				
+				// verifies exchange tracks number of a specific token designated to user
+				userBalance = await exchange.tokens(token.address, kinKendall)
+				userBalance.toString().should.equal(testAmount.toString())
+
 			})
 		})
 

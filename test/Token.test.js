@@ -212,7 +212,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 
 
-	describe('sending tokens from', () => {
+	describe('delegated token transfers', () => {
 		
 		let user_approved_amount
 		let result
@@ -223,7 +223,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 		})
 
 
-		describe('successful transfer from', () => {
+		describe('successful delegated transfer', () => {
 			
 			beforeEach(async() => {
 				result = await token.transferFrom(deployer, receiver, user_approved_amount, {from: exchange}) 
@@ -242,7 +242,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 			})
 
-			it('resets allowance to 0 after allowance user_approved_amount is used up with successful transferFrom', async() => {
+			it('resets allowance to 0 after successful transferFrom', async() => {
 				const allowance = await token.allowance(deployer, exchange)
 				allowance.toString().should.equal('0')
 			})
@@ -261,14 +261,19 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 		})
 
-		describe('failed transfer', () => {
+		describe('failed delegated transfer', () => {
 
+			const cheekyAmount = tokens(46)
+			
 			it('rejects attempts to transfer more than the user_approved_amount delegated by user to the exchange', async() => {
 				//Feeble attempt to transfer way too many tokens
-				const cheekyAmount = tokens(46)
 				await token.transferFrom(deployer, receiver, cheekyAmount, {from: exchange}).should.be.rejectedWith(EVM_REVERT)
 			})
 
+			it('rejects attempts to transfer to non-existant addresses', async() => {
+				//Feeble attempt to transfer way to an account that doesn't exist
+				await token.transferFrom(deployer, 0x0, cheekyAmount, {from: exchange}).should.be.rejectedWith(INVALID_ADDRESS)
+			})
 
 		})
 	})

@@ -242,6 +242,11 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 			})
 
+			it('resets allowance to 0 after allowance amount is used up with successful transferFrom', async() => {
+				const allowance = await token.allowance(deployer, exchange)
+				allowance.toString().should.equal('0')
+			})
+
 			it('emits a transfer event', async() => {
 				
 				//console.log(result.logs)

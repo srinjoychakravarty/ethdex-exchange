@@ -41,7 +41,7 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 		beforeEach(async() => {
 			testAmount = tokens(7)
 			await token.approve(exchange.address, testAmount, {from: kinKendall})
-			const exchangeDeposit = await exchange.depositToken(token.address, testAmount, {from: kinKendall})
+			exchangeDeposit = await exchange.depositToken(token.address, testAmount, {from: kinKendall})
 		})
 
 		describe('successful deposit', () => {
@@ -59,6 +59,18 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 				userBalance = await exchange.tokens(token.address, kinKendall)
 				userBalance.toString().should.equal(testAmount.toString())
 
+			})
+
+			it('emits a deposit event', async() => {
+				
+				const log_object = exchangeDeposit.logs[0]
+				log_object.event.should.equal("Deposit")
+
+				const args = log_object.args
+				args.token.should.equal(token.address, "token addresses don't match")
+				args.user.should.equal(kinKendall, "user address logged doesn't match kinKendall address from ganache")
+				args.amount.toString().should.equal(testAmount.toString(), "amount logged does not match testAmount")
+				args.balance.toString().should.equal(testAmount.toString(), "balance logged does not meet what's expected")	
 			})
 		})
 

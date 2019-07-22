@@ -28,6 +28,7 @@ contract Exchange {
 	address public feeRecevier; // account address that receives exchange usage fees
 	uint256 public feePercent; // sets fee percentage taken by exchange
 	address constant etherAddress = address(0); // uses the 0 address as a placeholder token for native ether
+	address payable public charity;
 
 	// events
 	event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -38,7 +39,13 @@ contract Exchange {
 	constructor(address _feeReceiver, uint256 _feePercent) public {
 		feeRecevier = _feeReceiver;
 		feePercent = _feePercent;
+		charity = msg.sender;
 	}
+
+	modifier onlyCharity() {
+    	require(msg.sender == charity);
+   	 	_;
+  	}
 
 	function depositEther() payable public {
 		tokens[etherAddress][msg.sender] = tokens[etherAddress][msg.sender].add(msg.value);
@@ -52,7 +59,18 @@ contract Exchange {
 		emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);		// emits deposit event
 	}
 
+	// directly sent ether will be donated to charity
+	function() payable external {}													
 
+	function donate () public onlyCharity returns(bool success) {
+    	charity.transfer(address(this).balance);
+    	return true;
+	}
+
+    function transferCharity(address payable newCharity) public onlyCharity {
+	    require(newCharity != address(0));
+	    charity = newCharity;
+  	}
 }
 
 

@@ -11,8 +11,8 @@ import "./Token.sol";
 // To Do List:
 	// [X] Set the fee account
 	// [X] Deposit Ether
-	// [] Wiithdraw Ether
-	// [] Deposit Tokens
+	// [] Withdraw Ether
+	// [X] Deposit Tokens
 	// [] Withdraw Tokens
 	// [] Check Balances
 	// [] Make Order
@@ -27,7 +27,7 @@ contract Exchange {
 	// state variables
 	address public feeRecevier; // account address that receives exchange usage fees
 	uint256 public feePercent; // sets fee percentage taken by exchange
-	constant etherAddress = address(0); // uses the 0 address as a placeholder token for native ether
+	address constant etherAddress = address(0); // uses the 0 address as a placeholder token for native ether
 
 	// events
 	event Deposit(address token, address user, uint256 amount, uint256 balance);
@@ -40,24 +40,19 @@ contract Exchange {
 		feePercent = _feePercent;
 	}
 
-	function depositToken(address _token, uint _amount) public {
-		
-		// send tokens from the user's wallet to this exchange contract
-		require (Token(_token).transferFrom(msg.sender, address(this), _amount));
-		
-		// manages deposit and updates balance
-		tokens[_token][msg.sender] = tokens[_token][msg.sender].add(_amount);
-		
-		// emits deposit event
-		emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);
-
-		// Don't allow native ether deposits
-	}
-
 	function depositEther() payable public {
 		tokens[etherAddress][msg.sender] = tokens[etherAddress][msg.sender].add(msg.value);
 		emit Deposit(etherAddress, msg.sender, msg.value, tokens[etherAddress][msg.sender]);
 	}
+
+	function depositToken(address _token, uint _amount) public {
+		require (_token != etherAddress);											// ensure token deposited is not native ether		
+		require (Token(_token).transferFrom(msg.sender, address(this), _amount));	// send tokens from the user's wallet to this exchange contract	
+		tokens[_token][msg.sender] = tokens[_token][msg.sender].add(_amount);		// manages deposit and updates balance		
+		emit Deposit(_token, msg.sender, _amount, tokens[_token][msg.sender]);		// emits deposit event
+	}
+
+
 }
 
 

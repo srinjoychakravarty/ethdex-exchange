@@ -1,4 +1,4 @@
-import {tokens, EVM_REVERT, INVALID_ADDRESS, INVALID_EXCHANGE} from './helpers.js'
+import {tokensToWei, EVM_REVERT, INVALID_ADDRESS, INVALID_EXCHANGE} from './helpers.js'
 
 const Token = artifacts.require('./Token') 
 
@@ -9,7 +9,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 	const name = "Dexcoin"
 	const symbol = "DEX"
 	const decimals = "18"
-	const totalSupply = tokens(166666666).toString()
+	const totalSupply = tokensToWei(166666666).toString()
 	let token
 
 	beforeEach(async() => {
@@ -55,7 +55,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 		describe('successful transfer', () => {
 			beforeEach(async() => {
-				amount = tokens(88)
+				amount = tokensToWei(88)
 				result = await token.transfer(receiver, amount, {from: deployer}) 
 			})
 
@@ -70,15 +70,15 @@ contract('Token', ([deployer, receiver, exchange]) => {
 				// console.log("receiver balance before transfer", balanceOf_receiver.toString())
 
 				// During Transfer
-				await token.transfer(receiver, tokens(111))
+				await token.transfer(receiver, tokensToWei(111))
 
 				// After Transfer
 				balanceOf_deployer = await token.balanceOf(deployer)
-				balanceOf_deployer.toString().should.equal(tokens(166666467).toString())
+				balanceOf_deployer.toString().should.equal(tokensToWei(166666467).toString())
 				// console.log("deployer balance after transfer", balanceOf_deployer.toString())
 				
 				balanceOf_receiver = await token.balanceOf(receiver)
-				balanceOf_receiver.toString().should.equal(tokens(199).toString())
+				balanceOf_receiver.toString().should.equal(tokensToWei(199).toString())
 				// console.log("receiver balance after transfer", balanceOf_receiver.toString())
 			})
 
@@ -91,7 +91,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 				const args = log_object.args
 				args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
 				args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
-				args.value.toString().should.equal(amount.toString(), "value does not match amount")
+				args.value.toString().should.equal(tokensToWei(88).toString(), "value does not match amount")
 			})
 
 			})
@@ -101,7 +101,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 			it('prevents sender from sending more tokens than they own', async() => {
 				let excessiveAmount
 
-				excessiveAmount = tokens(166666667) // 1 greater than totalSupply
+				excessiveAmount = tokensToWei(166666667) // 1 greater than totalSupply
 				await token.transfer(receiver, excessiveAmount, {from: deployer}).should.be.rejectedWith(EVM_REVERT)
 
 				// receiver tries to send 1 token even though they have 0 to begin with
@@ -121,7 +121,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 		let approvedResult
 
 		beforeEach(async() => {
-			approvedAmount = tokens(7)
+			approvedAmount = tokensToWei(7)
 			approvedResult = await token.approve(exchange, approvedAmount, {from: deployer}) 
 		})
 
@@ -141,7 +141,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 				const args = log_object.args
 				args.owner.toString().should.equal(deployer, "owner address doesn't match deployer address")
 				args.spender.toString().should.equal(exchange, "spender address doesn't match exchange address")
-				args.value.toString().should.equal(approvedAmount.toString(), "value does not match approvedAmount")
+				args.value.toString().should.equal(tokensToWei(7).toString(), "value does not match approvedAmount")
 			})
 		})
 
@@ -158,7 +158,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
 		let result
 
 		beforeEach(async() => {
-			user_approved_amount = tokens(45)
+			user_approved_amount = tokensToWei(45)
 			await token.approve(exchange, user_approved_amount, {from: deployer})
 		})
 
@@ -176,9 +176,9 @@ contract('Token', ([deployer, receiver, exchange]) => {
 
 				// After transferFrom
 				balanceOf_deployer = await token.balanceOf(deployer)
-				balanceOf_deployer.toString().should.equal(tokens(166666621).toString())	
+				balanceOf_deployer.toString().should.equal(tokensToWei(166666621).toString())	
 				balanceOf_receiver = await token.balanceOf(receiver)
-				balanceOf_receiver.toString().should.equal(tokens(45).toString())
+				balanceOf_receiver.toString().should.equal(tokensToWei(45).toString())
 
 			})
 
@@ -196,15 +196,15 @@ contract('Token', ([deployer, receiver, exchange]) => {
 				const args = log_object.args
 				args.from.toString().should.equal(deployer, "from address doesn't match deployer address")
 				args.to.toString().should.equal(receiver, "to address doesn't match receiver address")
-				args.value.toString().should.equal(user_approved_amount.toString(), "value does not match user_approved_amount")
+				args.value.toString().should.equal(tokensToWei(45).toString(), "value does not match user_approved_amount")
 			})
 
 		})
 
 		describe('failed delegated transfer', () => {
 
-			const cheekyAmount = tokens(46)
-			const audaciousAmount = tokens(166666668)
+			const cheekyAmount = tokensToWei(46)
+			const audaciousAmount = tokensToWei(166666668)
 			
 			it('rejects attempts to transfer more tokens than those delegated by user', async() => {
 				//Feeble attempt to transfer more tokens than approved

@@ -1,4 +1,4 @@
-import {tokens, EVM_REVERT, INVALID_ADDRESS, INVALID_EXCHANGE} from './helpers.js'
+import {etherAddressZero, etherToWei, tokensToWei, EVM_REVERT, INVALID_ADDRESS, INVALID_EXCHANGE} from './helpers.js'
 
 const Exchange = artifacts.require('./Exchange') 
 const Token = artifacts.require('./Token')
@@ -17,7 +17,7 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 		//Sets up dexcoin as the sample erc20 token for all tests
 		token = await Token.new()
 		// Gives kin the user some tokens to trade with on the exchange
-		token.transfer(kinKendall, tokens(25), {from: deployer})
+		token.transfer(kinKendall, tokensToWei(25), {from: deployer})
 	})
 
 	describe('deployment', () => {
@@ -33,6 +33,34 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 		})
 	})
 
+	describe('depositing ether', () => {
+
+		let etherDeposit
+		let etherAmount
+
+		beforeEach(async() => {
+			etherAmount = etherToWei(1)
+			etherDeposit = await exchange.depositEther({from: kinKendall, value: etherAmount})
+		})
+
+		it('verifies the ether deposit', async() => {
+			const etherBalance = await exchange.tokens(etherAddressZero, kinKendall)
+			etherBalance.toString().should.equal(etherAmount.toString())
+		})
+
+		it('emits a deposit event', async() => {
+			
+			const log_object = etherDeposit.logs[0]
+			log_object.event.should.equal("Deposit")
+
+			const args = log_object.args
+			args.token.should.equal(etherAddressZero, "token addresses don't match")
+			args.user.should.equal(kinKendall, "user address logged doesn't match kinKendall address from ganache")
+			args.amount.toString().should.equal(etherToWei(1).toString(), "amount logged does not match testAmount")
+			args.balance.toString().should.equal(etherToWei(1).toString(), "balance logged does not meet what's expected")	
+		})
+	})
+
 	describe('depositing tokens', () => {
 
 		let exchangeDeposit
@@ -41,12 +69,12 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 		describe('successful deposit', () => {
 		
 		beforeEach(async() => {
-			testAmount = tokens(7)
+			testAmount = tokensToWei(7)
 			await token.approve(exchange.address, testAmount, {from: kinKendall})
 			exchangeDeposit = await exchange.depositToken(token.address, testAmount, {from: kinKendall})
 		})
 
-			it('tracks the token deposit', async() => {
+			it('verifies the token deposit', async() => {
 				// Checks token balance on exchange
 				let exchangeBalance
 				let userBalance
@@ -69,21 +97,21 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 				const args = log_object.args
 				args.token.should.equal(token.address, "token addresses don't match")
 				args.user.should.equal(kinKendall, "user address logged doesn't match kinKendall address from ganache")
-				args.amount.toString().should.equal(testAmount.toString(), "amount logged does not match testAmount")
-				args.balance.toString().should.equal(testAmount.toString(), "balance logged does not meet what's expected")	
+				args.amount.toString().should.equal(tokensToWei(7).toString(), "amount logged does not match testAmount")
+				args.balance.toString().should.equal(tokensToWei(7).toString(), "balance logged does not meet what's expected")	
 			})
 		})
 
 		describe('failed deposit', () => {
 
 			it('when exchange has insufficient tokens approved for transferring', async() => {
-
 				// Exchange not approved for any tokens in this code path
 				await exchange.depositToken(token.address, testAmount, {from: kinKendall}).should.be.rejectedWith(EVM_REVERT)
 			})
 
 			it('rejects native ether deposits', async() => {
-
+				// Exchange does not allow depositToken function to be used to deposit native ether even when approved
+				await exchange.depositToken(etherAddressZero, testAmount, {from: kinKendall}).should.be.rejectedWith(EVM_REVERT)
 			})
 
 

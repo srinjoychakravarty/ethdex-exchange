@@ -5,14 +5,13 @@ import "./Token.sol";
 
 // Deposit & Withdraw Funds
 // Manage Orders - Make or Cancel
-// Handle Trades - Charge Feers
-
+// Handle Trades - Charge Peers
 
 // To Do List:
-	// [X] Set the fee account
-	// [X] Deposit Ether
+	// [✓] Set the fee account
+	// [✓] Deposit Ether
 	// [] Withdraw Ether
-	// [X] Deposit Tokens
+	// [✓] Deposit Tokens
 	// [] Withdraw Tokens
 	// [] Check Balances
 	// [] Make Order
@@ -51,6 +50,10 @@ contract Exchange {
 		tokens[etherAddress][msg.sender] = tokens[etherAddress][msg.sender].add(msg.value);
 		emit Deposit(etherAddress, msg.sender, msg.value, tokens[etherAddress][msg.sender]);
 	}
+
+	function withdrawEther(uint _amount) payable public {
+		tokens[etherAddress][msg.sender] = tokens[etherAddress][msg.sender].sub(_amount);
+	} 
 
 	function depositToken(address _token, uint _amount) public {
 		require (_token != etherAddress);											// ensure token deposited is not native ether		

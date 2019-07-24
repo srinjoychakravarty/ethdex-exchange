@@ -61,6 +61,32 @@ contract('Exchange', ([deployer, feeReceiver, kinKendall]) => {
 		})
 	})
 
+	describe('withdrawing ether', () => {
+
+		let etherWithdrawal
+		let etherQuantity
+
+		beforeEach(async() => {
+			// Deposit 3 ether first before test
+			etherQuantity = etherToWei(3)
+			await exchange.depositEther({from: kinKendall, value: etherQuantity})
+		})
+
+		describe('successful withdrawal', async() => {
+			
+			beforeEach(async() => {
+				// Withdraw 3 out 3 ethers
+				etherWithdrawal = await exchange.withdrawEther(etherToWei(3), {from: kinKendall})
+			})
+
+			it('withdraws correct amount of funds in ether', async() => {
+				const etherBalance = await exchange.tokens(etherAddressZero, kinKendall)
+				etherBalance.toString().should.equal('0')
+			})
+
+		})
+	})
+
 	describe('depositing tokens', () => {
 
 		let exchangeDeposit
